@@ -1,0 +1,35 @@
+sudo -E cavnue-tegra-mfg
+
+sudo cavnue-update-package-cache && sudo apt-get update && sudo apt -y upgrade && sudo apt install cavnue-ssh-pubkeys
+
+sudo systemctl status metrics-to-cloud.service
+
+sudo -E cavnue-commission prod-i94m-mm1890 2
+
+sudo -E cavnue-commission prod-sh130m-spare-01 1
+
+sudo reboot
+
+sudo python3 /usr/lib/cavnue/cavnue-common-net-config/cavnue_update_hosts.py --hostname prod-sh130m-spare-01
+
+ip addr show eqos0
+sudo ip addr del 10.0.4.53/27 dev eqos0
+
+export COMMON_NET_UTILS_PATH="/usr/lib/cavnue/cavnue-common-net-config/cavnue_update_hosts.py"
+export NETCFG_TEMPLATE="/etc/cavnue/cavnue-tegra-net-config/data/netcfg-cam-mk2.yaml.template"
+export NETCFG_TEST="/etc/cavnue/cavnue-tegra-net-config/data/netcfg-cam-mk2.yaml"
+export NETPLAN_PATH="/etc/netplan/01-netcfg.yaml"
+export NETPLAN_TIMEOUT_SEC=10
+
+sudo netplan --debug try --config-file ${NETCFG_TEST} --state ${NETPLAN_PATH} --timeout ${NETPLAN_TIMEOUT_SEC}
+
+sudo netplan --debug try --config-file ${NETCFG_TEST} --timeout ${NETPLAN_TIMEOUT_SEC}
+
+export TRY_NETPLAN_COMMAND="netplan try --debug --config-file ${NETCFG_TEST} --state ${NETPLAN_PATH} --timeout ${NETPLAN_TIMEOUT_SEC}"
+
+sudo netplan --debug try --state ${NETPLAN_PATH} --timeout ${NETPLAN_TIMEOUT_SEC}
+
+sudo netplan --debug try --state ~/netplanTest --timeout 10
+
+
+sudo python3 ${COMMON_NET_UTILS_PATH} --check_sitename

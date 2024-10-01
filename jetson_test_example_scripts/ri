@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for pkg in cavnue-common-net-config cavnue-tegra-net-config cavnue-common-node;
+do
+    echo -e "remove old" $pkg
+    sudo apt remove -y $pkg
+
+    echo -e "install new pkg"
+    sudo apt install --reinstall ./$pkg*.deb
+done

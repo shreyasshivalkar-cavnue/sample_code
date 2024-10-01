@@ -1,0 +1,17 @@
+GYROFLOW IMU LOG
+version,1.3
+id,custom_logger_name
+orientation,YxZ
+note,development_test
+fwversion,FIRMWARE_0.1.0
+timestamp, 1727677213128305379
+vendor,potatocam
+videofilename,stream_20240929-232013.128214.mp4
+lensprofile,potatocam/potatocam_mark1_prime_7_5mm_4k
+lens_info,pinhole
+frame_readout_time,16
+frame_readout_frequency,0
+tscale, 0.0012004801920768306
+gscale, 1
+ascale, 1
+t,gx,gy,gz,ax,ay,az

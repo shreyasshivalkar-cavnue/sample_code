@@ -1,0 +1,9 @@
+sudo systemctl stop camera-to-cloud.service && nv_snap && sudo systemctl restart camera-to-cloud.service
+
+sudo apt remove --purge camera-to-cloud && sudo apt install camera-to-cloud
+
+chronyc sources && sudo lldpctl
+
+gst-launch-1.0 nvarguscamerasrc sensor-id=0 tnr-mode=0 tnr-strength=0 ee-mode=0 ! "video/x-raw(memory:NVMM),width=(int)3840,height=(int)2160,format=(string)NV12" ! queue ! nvv4l2h265enc maxperf-enable=1 bitrate=8000000 insert-sps-pps=1 control-rate=0 preset-level=2  ! h265parse config-interval=-1 ! mpegtsmux ! tcpserversink port=5000 host=0.0.0.0
+
+sudo shutdown now

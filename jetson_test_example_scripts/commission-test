@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+CMD = "tailscale status --peers=false"
+
+if $CMD > /dev/null;then
+    echo Tailscale online...Ok
+else
+    echo Tailscale offline...Fail
+    exit 100
+fi
