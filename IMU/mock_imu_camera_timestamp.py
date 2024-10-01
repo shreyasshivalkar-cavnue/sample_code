@@ -14,9 +14,6 @@ GYROSCOPE = 1
 ACCELEROMETER = 2
 
 DENOMINATOR = 2**16
-# GYROSCOPE_SF = 500/DENOMINATOR
-# ACCELEROMETER_SF = 4/DENOMINATOR
-
 GYROSCOPE_SF = 1
 ACCELEROMETER_SF = 1
 
@@ -133,14 +130,14 @@ def get_epoch_timestamp_ns():
     return time.time_ns()
 
 
-def plot_raw_imu_readings(data, plot_name):
+def plot_imu_readings(data, index, plot_name):
     plt.figure()
 
     # Subplot 1: Signals 1, 2, 3, and CommonSignal
     plt.subplot(2, 1, 1)
-    plt.scatter(data['time'], data['GX'], label='GX')
-    plt.scatter(data['time'], data['GY'], label='GY')
-    plt.scatter(data['time'], data['GZ'], label='GZ')
+    plt.scatter(data[index], data['GX'], label='GX')
+    plt.scatter(data[index], data['GY'], label='GY')
+    plt.scatter(data[index], data['GZ'], label='GZ')
 
     plt.title('Plot 1: Raw Signals GX, GY,GZ')
     plt.xlabel('Time')
@@ -150,9 +147,9 @@ def plot_raw_imu_readings(data, plot_name):
 
     # Subplot 2: Signals 4, 5, 6, and CommonSignal
     plt.subplot(2, 1, 2)  # 2 rows, 1 column, 2nd subplot
-    plt.scatter(data['time'], data['AX'], label='AX')
-    plt.scatter(data['time'], data['AY'], label='AY')
-    plt.scatter(data['time'], data['AZ'], label='AZ')
+    plt.scatter(data[index], data['AX'], label='AX')
+    plt.scatter(data[index], data['AY'], label='AY')
+    plt.scatter(data[index], data['AZ'], label='AZ')
 
     plt.title('Plot 2: Signals AX, AY, AZ')
     plt.xlabel('Time')
@@ -170,7 +167,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--time_ms", default=60, type=int, help="Provide time window in ms of camera stream.")
     parser.add_argument("--odr", default=833, type=int, help="Provide output data rate.")
-    parser.add_argument("--plotraw", nargs='?', const=1, type=int, help="Plot raw readings.")
+    parser.add_argument("--plot_raw", nargs='?', const=1, type=int, help="Plot raw imu readings.")
     args = parser.parse_args()
 
     imu = IMU(args.odr)
@@ -179,14 +176,14 @@ if __name__ == "__main__":
     imu_csv_readings_name = "imu_data_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".csv"
     stream_file_name = "stream_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".mp4"
     stream_log_name = "stream_log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".log"
-    imu_raw_reading_plot_name = "imu_plot_raw_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".jpeg"
+    imu_raw_reading_plot_name = "imu_plot_raw_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".png"
     gcsv_writer = open(imu_readings_name, "w")
     csv_writer = open(imu_csv_readings_name, "w")
 
     time_ns = f"timestamp, {get_epoch_timestamp_ns()}\n"
     gscale = f"gscale, 1\n"
     ascale = f"ascale, 1\n"
-    tscale = f"tscale, {1/args.odr}\n"
+    tscale = f"tscale, {1/1000000000}\n"
 
     gcsv_writer.write("GYROFLOW IMU LOG\n")
     gcsv_writer.write("version,1.3\n")
@@ -262,5 +259,5 @@ if __name__ == "__main__":
 
     imu_reading_dataframe = pd.DataFrame(imu_readings)
 
-    if args.plotraw:
-        plot_raw_imu_readings(imu_reading_dataframe, imu_raw_reading_plot_name)
+    if args.plot_raw:
+        plot_imu_readings(imu_reading_dataframe, "time", imu_raw_reading_plot_name)

@@ -1,12 +1,13 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3 IMU/imu_camera_timestamp.py
 import argparse
 import concurrent.futures
 import datetime
+import matplotlib.pyplot as plt
+import pandas as pd
+import re
 import smbus2
 import subprocess
 import time
-import pandas as pd
-import matplotlib.pyplot as plt
 
 TIMEOUT_secs = 60*1
 GYROSCOPE = 1
@@ -111,7 +112,7 @@ def get_epoch_timestamp_ns():
     return time.time_ns()
 
 
-def plot_raw_imu_readings(data, index, plot_name):
+def plot_imu_readings(data, index, plot_name):
     plt.figure()
 
     # Subplot 1: Signals 1, 2, 3, and CommonSignal
@@ -143,59 +144,6 @@ def plot_raw_imu_readings(data, index, plot_name):
     print(f"Plot saved at {plot_name}")
 
 
-def extract_timestamps(stream_log):
-    # List to store the SoF and EoF pairs
-    timestamp_pairs = []
-
-    # Regular expression to match the target log line
-    pattern = r'CONSUMER:\s+Acquired Frame:\s+(\d+),\s+SoF:\s+(\d+),\s+EoF:\s+(\d+)'
-
-    # Open the log file and process it line by line
-    for line in stream_log:
-        match = re.search(pattern, line)
-        if match:
-            frame_id = int(match.group(1))
-            sof_timestamp = int(match.group(2))
-            eof_timestamp = int(match.group(3))
-            timestamp_pairs.append((frame_id, sof_timestamp, eof_timestamp))
-
-    return timestamp_pairs
-
-
-def filter_readings_per_frame(stream_log):
-    camera_offset = 30990127488  # read from device
-
-    timestamp_pairs = extract_timestamps(stream_log)
-
-    # List to store the filtered data
-    filtered_data = []
-
-    # Loop through each SoF and EoF pair
-    for fid, sof, eof in timestamp_pairs:
-        # Convert SoF and EoF to numeric types to compare with the 'timestamp' column
-        fid = int(fid)
-        sof = int(sof) - int(camera_offset)
-        eof = int(eof) - int(camera_offset)
-
-        # Filter the CSV data for rows where the 'timestamp' is between SoF and EoF
-        filtered_rows = data[(data['t'] >= sof) & (data['t'] <= eof)]
-
-        # Calculate the mean of each column, except for the 'timestamp' column
-        avg = filtered_rows.mean(numeric_only=True)
-        avg['fid'] = fid
-
-        # filtered_data.append((fid, gx, gy, gz, ax, ay, az))
-        filtered_data.append(avg)
-
-    # Convert the list of averages to a DataFrame
-    if filtered_data:
-        result = pd.DataFrame(filtered_data)
-    else:
-        result = pd.DataFrame()
-
-    return result
-
-
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
@@ -211,8 +159,7 @@ if __name__ == "__main__":
     imu_csv_readings_name = "imu_data_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".csv"
     stream_file_name = "stream_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".mp4"
     stream_log_name = "stream_log_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".log"
-    imu_raw_reading_plot_name = "imu_plot_raw_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".jpeg"
-    imu_filtered_reading_plot_name = "imu_plot_filtered_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".jpeg"
+    imu_raw_reading_plot_name = "imu_plot_raw_" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S.%f") + ".png"
     gcsv_writer = open(imu_readings_name, "w")
     csv_writer = open(imu_csv_readings_name, "w")
 
@@ -294,8 +241,4 @@ if __name__ == "__main__":
     imu_reading_dataframe = pd.DataFrame(imu_readings)
 
     if args.plot_raw:
-        plot_raw_imu_readings(imu_reading_dataframe, "time", imu_raw_reading_plot_name)
-
-    if args.plot_filtered:
-        imu_filtered_reading_df = filter_readings_per_frame(bg_output.decode().strip())
-        plot_raw_filtered_readings(imu_filtered_reading_df, "fid", imu_filtered_reading_plot_name)
+        plot_imu_readings(imu_reading_dataframe, "time", imu_raw_reading_plot_name)
