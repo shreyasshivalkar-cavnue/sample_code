@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package cavnue.messages.geometry.v1;
+
+import "cavnue/messages/geometry/v1/vector.proto";
+
+// 2D Floating point Bounding Box.
+message BoundingBox2f {
+  Vector2f center = 1;
+  Vector2f extents = 2;
+}
+
+// 3D Floating point Bounding Box.
+message BoundingBox3f {
+  Vector3f center = 1;
+  Vector3f extents = 2;
+}
+
+// 3D Floating point Bounding Box with rotation.
+message RotatedBoundingBox3f {
+  Vector3f center = 1;
+  Vector4f center_rotation = 2;
+  Vector3f extents = 3;
+}
+
+// 3D Double Bounding Box with rotation.
+message RotatedBoundingBox3d {
+  Vector3d center = 1;
+  Vector4f center_rotation = 2;
+  Vector3f extents = 3;
+}

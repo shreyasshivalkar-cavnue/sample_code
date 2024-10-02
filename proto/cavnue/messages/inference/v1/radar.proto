@@ -1,0 +1,125 @@
+syntax = "proto3";
+
+package cavnue.messages.inference.v1;
+
+import "cavnue/messages/common/v1/common.proto";
+import "cavnue/messages/common/v1/field_options.proto";
+import "cavnue/messages/geometry/v1/vector.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+message RadarInfo {
+  // Client Id.
+  string client_id = 1;
+  // Radar firmware version.
+  string version = 2;
+  // Time since radar was restarted.
+  google.protobuf.Duration time_since_restart = 3;
+}
+
+// Platform tracked radar objects message.
+message ObjectList {
+  // Common header.
+  common.v1.Header header = 1;
+  // Common radar attributes.
+  RadarInfo info = 2;
+  // Timestamp representing the observed data.
+  google.protobuf.Timestamp observation_ts = 3;
+  // Duration this data is valid.
+  google.protobuf.Duration observation_duration = 4;
+  // Data Source of this Actor
+  common.v1.DataSource data_source = 5;
+  message Object {
+    // Acceleration of the object.
+    double acceleration = 1 [(common.v1.units) = UNITS_UNSPECIFIED];
+    // Class of the object.
+    int32 class = 2 [(common.v1.units) = UNITS_UNSPECIFIED];
+    // Closest Lane.
+    int32 closest_lane = 3;
+    // Heading of the object.
+    double heading = 4 [(common.v1.units) = UNITS_UNSPECIFIED];
+    // Height of the object.
+    double height = 5 [(common.v1.units) = UNITS_UNSPECIFIED];
+    // Unique tag number for identification of the object.
+    int32 id = 6;
+    // Length of the object.
+    double length = 7 [(common.v1.units) = UNITS_UNSPECIFIED];
+    // Position of the object, facing side.
+    geometry.v1.Vector2f position_facing = 8
+        [(common.v1.units) = UNITS_UNSPECIFIED];
+    // Position of the object, front side.
+    geometry.v1.Vector2f position_front = 9
+        [(common.v1.units) = UNITS_UNSPECIFIED];
+    // Quality.
+    double quality = 10;
+    // Absolute object speed in direction of the object heading.
+    double speed = 11 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+
+    message TrackingStatus {
+      // Number of cycles since last update.
+      int32 cycles_since_last_update = 1;
+      // Mileage of the object.
+      double mileage = 2 [(common.v1.units) = UNITS_METERS];
+      // Object status flag, True is new object.
+      bool new_object = 3;
+      // Quality.
+      double quality = 4;
+    }
+    // Debug information regarding track.
+    TrackingStatus tracking_status = 12;
+    // Within Zone.
+    int32 within_zone = 13;
+  }
+  // Tracked objects from radar.
+  repeated Object objects = 6;
+}
+
+// Platform raw radar targets message.
+message TargetList {
+  // Common header.
+  common.v1.Header header = 1;
+  // Common radar attributes.
+  RadarInfo info = 2;
+  // Timestamp representing the observed data.
+  google.protobuf.Timestamp observation_ts = 3;
+  // Duration this data is valid.
+  google.protobuf.Duration observation_duration = 4;
+  // Data Source of this Actor
+  common.v1.DataSource data_source = 5;
+  message Target {
+    // Azimuth angle [rad] of the target.
+    double azimuth_angle = 1 [(common.v1.units) = UNITS_RADIANS];
+    // Elevation angle [rad] of the target.
+    double elevation_angle = 2 [(common.v1.units) = UNITS_RADIANS];
+    // Range [m], distance between sensor and target.
+    double range = 3 [(common.v1.units) = UNITS_METERS];
+    // Radar cross-section of the target.
+    double rcs = 4;
+    // Snr in [dB] power - noise.
+    double snr = 5 [(common.v1.units) = UNITS_DECIBELS];
+    // Radial speed [m/s] of the target.
+    double speed_radial = 6 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+  }
+  // Targets from radar.
+  repeated Target targets = 6;
+}
+
+// Platform radar stats message.
+message RadarStats {
+  // Common header.
+  common.v1.Header header = 1;
+  // Common radar attributes.
+  RadarInfo info = 2;
+  // Timestamp representing the observed data.
+  google.protobuf.Timestamp observation_ts = 3;
+  // Duration this data is valid.
+  google.protobuf.Duration observation_duration = 4;
+  // Data Source of this Actor
+  common.v1.DataSource data_source = 5;
+  // Blind boolean.
+  bool blind = 6;
+  // Interference booloean.
+  bool interference = 7;
+  // Rain boolean.
+  bool rain = 8;
+}

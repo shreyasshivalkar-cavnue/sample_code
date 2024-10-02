@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package cavnue.messages.geometry.v1;
+
+message Scalarf {
+  float scalar = 1;
+}
+
+message Scalard {
+  double scalar = 1;
+}
+
+message VarianceScalarf {
+  float scalar = 1;
+  float variance = 2;
+}

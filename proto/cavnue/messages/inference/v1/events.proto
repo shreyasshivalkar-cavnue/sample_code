@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package cavnue.messages.inference.v1;
+
+import "cavnue/messages/common/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+message Event {
+  // Common header.
+  common.v1.Header header = 1;
+  // Unique Event Id.
+  int64 event_id = 2;
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    TYPE_IMPEDING = 1;
+    TYPE_SPEEDING = 2;
+    TYPE_STATIONARY = 3;
+    TYPE_COLLISION = 4;
+  }
+  // Type of Event.
+  Type type = 3;
+  enum Severity {
+    SEVERITY_UNSPECIFIED = 0;
+    SEVERITY_HAZARD = 1;
+    SEVERITY_OF_INTEREST = 2;
+  }
+  // Severity of Event
+  Severity severity = 4;
+  // Time event started
+  google.protobuf.Timestamp start_time = 5;
+  // Time event completed
+  google.protobuf.Timestamp end_time = 6;
+  // Confidence of event occurence
+  float confidence = 7;
+  // Actors invovled in this event
+  repeated int64 actor_ids = 8;
+}
+
+message TrafficEvent {
+  // Common header.
+  common.v1.Header header = 1;
+  // Unique Event Id.
+  int64 event_id = 2;
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    TYPE_CONGESTION = 1;
+  }
+  // Type of Event.
+  Type type = 3;
+  enum Severity {
+    SEVERITY_UNSPECIFIED = 0;
+    SEVERITY_OF_INTEREST = 1;
+  }
+  // Severity of Event
+  Severity severity = 4;
+  // Time event started
+  google.protobuf.Timestamp start_time = 5;
+  // Time event completed
+  google.protobuf.Timestamp end_time = 6;
+  // Confidence of event occurence
+  float confidence = 7;
+  // Lane segements invovled in this event
+  repeated int64 lane_segment_id = 8;
+}

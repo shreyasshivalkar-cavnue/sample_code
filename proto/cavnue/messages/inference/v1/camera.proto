@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package cavnue.messages.inference.v1;
+
+import "cavnue/messages/common/v1/common.proto";
+import "cavnue/messages/geometry/v1/bounding_box.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+// Platform camera detection message.
+message CameraDetection {
+  // Common header.
+  common.v1.Header header = 1;
+  // Timestamp representing the observed data.
+  google.protobuf.Timestamp observation_ts = 2;
+  // Duration this data is valid.
+  google.protobuf.Duration observation_duration = 3;
+  // Data Source of this camera detection.
+  common.v1.DataSource data_source = 4;
+  message Detection {
+    // Detection bounding box.
+    geometry.v1.BoundingBox2f bbox = 1;
+    // Detection class enum.
+    common.v1.Classification classification = 2;
+    // Detection class confidence.
+    float class_confidence = 3;
+    // Detection confidence.
+    float detection_confidence = 4;
+  }
+  // List of detections.
+  repeated Detection detections = 5;
+  // A hash of the location_id, sensor_id, and timestamp. For simulation, the
+  // simulation_id is also hashed. The data_id is a unique spatiotemporal id on
+  // the sensor level that we can use to connect to a specific artifact. It
+  // allows us to link things such as annotations, pipeline messages, events,
+  // etc. to a specific, discrete artifact
+  int64 data_id = 6;
+}

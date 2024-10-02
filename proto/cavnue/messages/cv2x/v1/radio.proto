@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package cavnue.messages.cv2x.v1;
+
+import "cavnue/messages/common/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+// Common attributes for radio messages.
+message RadioCommon {
+  // Unique Radio Identifier.
+  uint64 radio_id = 1;
+  // Provider Service Identifier - Defines the type of encoded message.
+  uint32 psid = 2;
+  // UPER encoded message payload.
+  bytes encoded_payload = 3;
+}
+
+// Platform Radio send message.
+message RadioSend {
+  // Common header.
+  common.v1.Header header = 1;
+  // Common radio attributes.
+  RadioCommon sent_common = 2;
+  // Number of actors in encoded message
+  int32 actor_count = 3;
+}
+
+// Platform Radio receive message.
+message RadioReceive {
+  // Common header.
+  common.v1.Header header = 1;
+  // Common radio attributes.
+  RadioCommon received_common = 2;
+  // Radio recieved Timestamp.
+  google.protobuf.Timestamp radio_timestamp = 3;
+  // Service recieved Timestamp.
+  google.protobuf.Timestamp service_timestamp = 4;
+}

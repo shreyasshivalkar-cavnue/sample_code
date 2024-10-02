@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package cavnue.messages.trigger.v1;
+
+import "cavnue/messages/common/v1/common.proto";
+import "google/protobuf/timestamp.proto";
+
+message PlaybackTrigger {
+  // Common header.
+  common.v1.Header header = 1;
+  message Trigger {
+    repeated string topics = 1;
+    message PlaybackTime {
+      google.protobuf.Timestamp start_ts = 1;
+      google.protobuf.Timestamp end_ts = 2;
+    }
+    optional PlaybackTime time = 2;
+    optional int64 dataset_run_id = 3;
+    optional string dataset_identifier = 4;
+  }
+  // Fields used to initiate playback.
+  Trigger trigger = 2;
+}

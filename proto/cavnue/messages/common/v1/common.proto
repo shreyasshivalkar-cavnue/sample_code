@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package cavnue.messages.common.v1;
+
+import "google/protobuf/timestamp.proto";
+
+// Core fields that must be present in every message sent between services.
+message Header {
+  // Timestamp of when the proto message is created.
+  google.protobuf.Timestamp ts = 1;
+  // Observability trace context.
+  string trace_context = 2;
+  // Parent ids for the message
+  repeated int64 parent_ids = 3;
+  // UUID for the message
+  int64 id = 4;
+  // Dataset run id
+  int64 run_id = 5;
+}
+
+// Detected Object Class
+enum Classification {
+  CLASSIFICATION_UNSPECIFIED = 0;
+  CLASSIFICATION_BUS = 1;
+  CLASSIFICATION_CAR = 2;
+  CLASSIFICATION_COMMERCIAL_TRUCK = 3;
+  CLASSIFICATION_MOTORBIKE = 4;
+  CLASSIFICATION_PEDESTRIAN = 5;
+  CLASSIFICATION_EMERGENCY_VEHICLE = 6;
+  CLASSIFICATION_BICYCLE = 7;
+  CLASSIFICATION_TRAILER = 8;
+  CLASSIFICATION_HEAVY_EQUIPMENT = 9;
+  CLASSIFICATION_SMALL_VEHICLE = 10;
+}
+
+message Location {
+  // Location identifier string.
+  string identifier = 1;
+  // Numeric id
+  int64 id = 2;
+}
+
+message Sensor {
+  // Sensor identifier string.
+  string identifier = 1;
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    TYPE_CAMERA = 1;
+    TYPE_RADAR = 2;
+  }
+  // Sensor type enum.
+  Type type = 2;
+  // Numeric id
+  int64 id = 3;
+}
+
+// Defines a Datasource.
+message DataSource {
+  enum Deployment {
+    DEPLOYMENT_UNSPECIFIED = 0;
+    DEPLOYMENT_MPG_CTY = 1;
+    DEPLOYMENT_MPG_STW = 2;
+    DEPLOYMENT_I96 = 3;
+    DEPLOYMENT_MPG_CTY_SIM = 4;
+    DEPLOYMENT_MPG_STW_SIM = 5;
+    DEPLOYMENT_I96_SIM = 6;
+    DEPLOYMENT_I94 = 7;
+    DEPLOYMENT_I94_SIM = 8;
+    DEPLOYMENT_CAVNUE_I94 = 9;
+  }
+  // Deployment
+  Deployment deployment = 1;
+  // Location
+  Location location = 2;
+  // Sensor
+  Sensor sensor = 3;
+  // Simulation ID
+  string simulation_id = 4;
+}

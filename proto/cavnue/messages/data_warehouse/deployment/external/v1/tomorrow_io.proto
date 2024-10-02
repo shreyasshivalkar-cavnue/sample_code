@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package cavnue.messages.data_warehouse.deployment.external.v1;
+
+import "cavnue/third_party/bq/v1/bq_field.proto";
+import "cavnue/third_party/bq/v1/bq_table.proto";
+
+import "cavnue/messages/common/v1/field_options.proto";
+import "google/protobuf/timestamp.proto";
+
+// Tomorrow.io weather table. For field information, go to
+// https://docs.tomorrow.io/reference/data-layers-core
+message TomorrowIO {
+  option (gen_bq_schema.bigquery_opts).table_name = "TomorrowIO";
+
+  // A hash of the location_id and timestamp. For simulation, the simulation_id
+  // is also hashed. The source id is a unique id for a location and timestamp.
+  // We can attribute unique spatiotemporal attributes, such as weather, to this
+  // id
+  optional int64 source_id = 1 [
+    (gen_bq_schema.bigquery) = { require: true cluster: true },
+    (common.v1.primary_key) = true
+  ];
+  optional google.protobuf.Timestamp ts = 2 [(gen_bq_schema.bigquery) = {
+    require: true
+    type_override: "TIMESTAMP"
+    partition: true
+  }];
+  uint32 duration = 3 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.units) = UNITS_MILLISECONDS
+  ];
+  float cloud_cover = 4;
+  float humidity = 5;
+  string precipitation_type = 6;
+  float rain_intensity = 7 [(common.v1.units) = UNITS_MILLIMETERS_PER_HOUR];
+  float snow_intensity = 8 [(common.v1.units) = UNITS_MILLIMETERS_PER_HOUR];
+  float temperature = 9 [(common.v1.units) = UNITS_CELSIUS];
+  float wind_speed = 10 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+  float wind_direction = 11;
+  float visibility = 12 [(common.v1.units) = UNITS_METERS];
+  string weather_type = 13;
+}

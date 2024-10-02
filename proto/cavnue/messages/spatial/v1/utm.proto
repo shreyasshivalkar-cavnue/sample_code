@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package cavnue.messages.spatial.v1;
+
+message UTMProjection {
+  // UTM zone.
+  int32 zone = 1;
+  // North=true, South=false
+  bool north = 2;
+}

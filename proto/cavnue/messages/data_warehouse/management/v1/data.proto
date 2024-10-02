@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package cavnue.messages.data_warehouse.management.v1;
+
+import "cavnue/third_party/bq/v1/bq_field.proto";
+import "cavnue/third_party/bq/v1/bq_table.proto";
+
+import "cavnue/messages/common/v1/field_options.proto";
+import "google/protobuf/timestamp.proto";
+
+// The Data table is the central piece of the database in a snowflake/star
+// model. It allows us to index each individual sensor output and connect that
+// output to annotations, pipeline messages, etc. This table is populated by the
+// indexing pipeline. Users should not write to it directly
+message Data {
+  option (gen_bq_schema.bigquery_opts).table_name = "Data";
+
+  // A hash of the location_id, sensor_id, and timestamp. For simulation, the
+  // simulation_id is also hashed. The data_id is a unique spatiotemporal id on
+  // the sensor level that we can use to connect to a specific artifact. It
+  // allows us to link things such as annotations, pipeline messages, events,
+  // etc. to a specific, discrete artifact
+  optional int64 data_id = 1 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.primary_key) = true
+  ];
+  // A hash of the location_id and timestamp. For simulation, the simulation_id
+  // is also hashed
+  optional int64 source_id = 2
+      [(gen_bq_schema.bigquery) = { require: true cluster: true }];
+  optional int64 cohort_id = 3
+      [(gen_bq_schema.bigquery) = { require: true cluster: true }];
+  optional int64 location_id = 4
+      [(gen_bq_schema.bigquery) = { require: true cluster: true }];
+  optional int64 sensor_id = 5
+      [(gen_bq_schema.bigquery) = { require: true cluster: true }];
+  string simulation_id = 6;
+  optional google.protobuf.Timestamp ts = 7 [(gen_bq_schema.bigquery) = {
+    require: true
+    type_override: "TIMESTAMP"
+    partition: true
+  }];
+}

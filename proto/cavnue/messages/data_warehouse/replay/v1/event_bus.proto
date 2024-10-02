@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package cavnue.messages.data_warehouse.replay.v1;
+
+import "cavnue/third_party/bq/v1/bq_field.proto";
+import "cavnue/third_party/bq/v1/bq_table.proto";
+import "cavnue/messages/common/v1/field_options.proto";
+
+import "google/protobuf/timestamp.proto";
+
+// Single event bus table for external deployment schema
+message EventBus {
+  option (gen_bq_schema.bigquery_opts).table_name = "EventBus";
+
+  // A generic timestamp field that will differ for each message
+  optional google.protobuf.Timestamp ts = 1
+      [(gen_bq_schema.bigquery) = { require: true type_override: "TIMESTAMP" }];
+  // Unique context from a telemetry trace
+  string trace_context = 2;
+  // The timestamp portion of the redis id
+  optional google.protobuf.Timestamp redis_ts = 3 [(gen_bq_schema.bigquery) = {
+    require: true
+    type_override: "TIMESTAMP"
+    partition: true
+  }];
+  // The id portion of the redis id
+  optional uint32 redis_id = 4 [(gen_bq_schema.bigquery) = { require: true }];
+  // The proto message definition by name. This should be the full path of the
+  // message (e.g. cavnue.messages.inference.v1.camera_pb2.CameraDetection)
+  optional string message_name = 5
+      [(gen_bq_schema.bigquery) = { require: true cluster: true }];
+  // The redis topic
+  optional string topic = 6
+      [(gen_bq_schema.bigquery) = { require: true cluster: true }];
+  // Parent ids for the message
+  repeated int64 parent_ids = 7;
+  // UUID for the message
+  optional int64 id = 8 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.primary_key) = true
+  ];
+  // The serialized proto message
+  optional bytes payload = 9 [(gen_bq_schema.bigquery) = { require: true }];
+  // Dataset run id
+  optional int64 run_id = 10 [(gen_bq_schema.bigquery) = { cluster: true }];
+}

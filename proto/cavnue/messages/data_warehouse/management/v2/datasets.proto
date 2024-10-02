@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package cavnue.messages.data_warehouse.management.v2;
+
+import "cavnue/third_party/bq/v1/bq_field.proto";
+import "cavnue/third_party/bq/v1/bq_table.proto";
+
+import "cavnue/messages/common/v1/field_options.proto";
+import "google/protobuf/timestamp.proto";
+
+// A dataset for platform replay
+message Dataset {
+  option (gen_bq_schema.bigquery_opts).table_name = "Datasets";
+
+  // UUID for the dataset
+  optional int64 dataset_id = 1 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.primary_key) = true
+  ];
+  optional string identifier = 2 [(gen_bq_schema.bigquery) = { require: true }];
+  // The data ids in the dataset
+  repeated int64 data_ids = 3;
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    TYPE_SPEEDING = 1;
+    TYPE_IMPEDING = 2;
+    TYPE_STATIONARY = 3;
+    TYPE_TRAFFIC = 4;
+    TYPE_COLLISION = 5;
+  }
+  // Dataset type
+  Type type = 4;
+  optional google.protobuf.Timestamp start_ts = 5 [
+    (gen_bq_schema.bigquery) = { type_override: "TIMESTAMP", require: true }
+  ];
+  optional google.protobuf.Timestamp end_ts = 6 [
+    (gen_bq_schema.bigquery) = { type_override: "TIMESTAMP", require: true }
+  ];
+  string simulation_id = 7;
+  optional int64 source_cohort_id = 8
+      [(gen_bq_schema.bigquery) = { require: true, cluster: true }];
+  optional int64 replay_cohort_id = 9
+      [(gen_bq_schema.bigquery) = { require: true, cluster: true }];
+}

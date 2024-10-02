@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package cavnue.messages.spatial.v1;
+
+message WGS84 {
+  // Latitude
+  double lat = 1;
+  // Longitude
+  double lon = 2;
+  // Elevation
+  float elevation = 3;
+}

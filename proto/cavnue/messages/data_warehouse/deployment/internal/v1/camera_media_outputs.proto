@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package cavnue.messages.data_warehouse.deployment.internal.v1;
+
+import "cavnue/third_party/bq/v1/bq_field.proto";
+import "cavnue/third_party/bq/v1/bq_table.proto";
+
+import "cavnue/messages/common/v1/field_options.proto";
+import "google/protobuf/timestamp.proto";
+
+// Index of all discrete camera output data. Each frame is indexed via a data_id
+// and the datasource_id is used to reference back to the parent data source.
+// This table is populated by the indexing pipeline. Users should not write to
+// it directly
+message CameraMediaOutput {
+  option (gen_bq_schema.bigquery_opts).table_name = "CameraMediaOutputs";
+
+  // The GCS URI for the datasource
+  optional string uri = 1 [(gen_bq_schema.bigquery) = { require: true }];
+  // A hash of the location_id, sensor_id, timestamp, and variant. For
+  // simulation, the simulation_id is also hashed. The data_id is a unique
+  // spatiotemporal id on the sensor level that we can use to connect to a
+  // specific artifact. It allows us to link things such as annotations,
+  // pipeline messages, events, etc. to a specific, discrete artifact
+  optional int64 data_id = 2 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.primary_key) = true
+  ];
+  // The timestamp of the individual frame
+  optional google.protobuf.Timestamp ts = 3 [(gen_bq_schema.bigquery) = {
+    require: true
+    type_override: "TIMESTAMP"
+    partition: true
+  }];
+}
+
+// Metadata for parent datasources for cameras outputs. This table is populated
+// by the indexing pipeline. Users should not write to it directly
+message CameraMediaOutputMetadata {
+  option (gen_bq_schema.bigquery_opts).table_name =
+      "CameraMediaOutputsMetadata";
+
+  // The GCS URI for the datasource
+  optional string uri = 1 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.primary_key) = true
+  ];
+  // The start timestamp of the data source
+  optional google.protobuf.Timestamp start_ts = 2
+      [(gen_bq_schema.bigquery) = { require: true type_override: "TIMESTAMP" }];
+  optional uint32 height = 3 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.units) = UNITS_PIXELS
+  ];
+  optional uint32 width = 4 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.units) = UNITS_PIXELS
+  ];
+  optional float duration = 5 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.units) = UNITS_MILLISECONDS
+  ];
+  optional uint32 frame_rate = 6 [(gen_bq_schema.bigquery) = { require: true }];
+}

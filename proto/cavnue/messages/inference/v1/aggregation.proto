@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package cavnue.messages.inference.v1;
+
+import "cavnue/messages/common/v1/common.proto";
+import "cavnue/messages/common/v1/field_options.proto";
+import "google/protobuf/timestamp.proto";
+import "cavnue/third_party/bq/v1/bq_field.proto";
+import "cavnue/messages/geometry/v1/vector.proto";
+import "cavnue/messages/spatial/v1/utm.proto";
+
+message LaneAggregation {
+  // Common header.
+  common.v1.Header header = 1;
+  google.protobuf.Timestamp interval_start_ts = 2
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  google.protobuf.Timestamp interval_end_ts = 3
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  // Statistics aggregated per lane
+  message Statistics {
+    int32 lane_id = 1;
+    float speed_mean = 2 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+    float speed_std = 3 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+    float speed_p5 = 4 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+    float speed_p70 = 5 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+    uint32 actors_unique = 6;
+  }
+  repeated Statistics statistics = 4;
+}
+
+message ActorAggregation {
+  // Common header.
+  common.v1.Header header = 1;
+  // Timestamp representing the start of the aggregation interval.
+  google.protobuf.Timestamp interval_start_ts = 2
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  // Timestamp representing the end of the aggregation interval.
+  google.protobuf.Timestamp interval_end_ts = 3
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  // Statistics aggregated per lane
+  message Statistics {
+    int64 actor_id = 1;
+    float speed_mean = 2 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+    geometry.v1.Vector3d position_last = 3
+        [(common.v1.units) = UNITS_METERS, (common.v1.crs) = CRS_UTM];
+    // UTM of position_last.
+    spatial.v1.UTMProjection projection = 4;
+  }
+  repeated Statistics statistics = 4;
+}

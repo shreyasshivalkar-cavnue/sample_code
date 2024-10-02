@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package cavnue.messages.inference.v1;
+
+import "cavnue/messages/common/v1/common.proto";
+import "cavnue/messages/common/v1/field_options.proto";
+import "google/protobuf/timestamp.proto";
+import "cavnue/third_party/bq/v1/bq_field.proto";
+
+message LaneSegmentAggregation {
+  // Common header.
+  common.v1.Header header = 1;
+  google.protobuf.Timestamp interval_start_ts = 2
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  google.protobuf.Timestamp interval_end_ts = 3
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  // Statistics aggregated per lane
+  message Statistics {
+    int64 lane_segment_id = 1;
+    float speed_mean = 2 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+    uint32 actors_unique = 3;
+    float density = 4 [(common.v1.units) = UNITS_VEHICLES_PER_METER];
+  }
+  repeated Statistics statistics = 4;
+}
+
+message RoadSegmentAggregation {
+  // Common header.
+  common.v1.Header header = 1;
+  google.protobuf.Timestamp interval_start_ts = 2
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  google.protobuf.Timestamp interval_end_ts = 3
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  // Statistics aggregated per lane
+  message Statistics {
+    int32 road_segment_id = 1;
+    float speed_mean = 2 [(common.v1.units) = UNITS_METERS_PER_SECOND];
+    uint32 actors_unique = 3;
+    float density = 4 [(common.v1.units) = UNITS_VEHICLES_PER_METER];
+  }
+  repeated Statistics statistics = 4;
+}
+
+message AverageTrafficCalculation {
+  optional google.protobuf.Timestamp interval_start_ts = 2
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  optional google.protobuf.Timestamp interval_end_ts = 3
+      [(gen_bq_schema.bigquery) = { type_override: "TIMESTAMP" }];
+  // Statistics aggregated per lane
+  message Statistics {
+    int32 road_segment_id = 1;
+    float average_actors_unique = 2;
+  }
+  repeated Statistics statistics = 4;
+}
+
+message AnnualAverageDailyTrafficCalculation {
+  // Common header.
+  common.v1.Header header = 1;
+  AverageTrafficCalculation average_traffic_calculation = 2;
+}
+
+message MonthlyAverageDailyTrafficCalculation {
+  // Common header.
+  common.v1.Header header = 1;
+  int32 month = 2;
+  int32 year = 3;
+  AverageTrafficCalculation average_traffic_calculation = 4;
+}

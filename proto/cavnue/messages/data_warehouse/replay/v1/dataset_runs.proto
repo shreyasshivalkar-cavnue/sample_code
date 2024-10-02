@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package cavnue.messages.data_warehouse.replay.v1;
+
+import "cavnue/third_party/bq/v1/bq_field.proto";
+import "cavnue/third_party/bq/v1/bq_table.proto";
+import "cavnue/messages/common/v1/field_options.proto";
+
+import "google/protobuf/timestamp.proto";
+
+// Map data to simulation or dataset
+message DatasetRun {
+  option (gen_bq_schema.bigquery_opts).table_name = "DatasetRuns";
+
+  // Unique id for the dataset run
+  optional int64 run_id = 1 [
+    (gen_bq_schema.bigquery) = { require: true },
+    (common.v1.primary_key) = true
+  ];
+  // Timestamp representing the time this run was replayed
+  optional google.protobuf.Timestamp ts = 2 [(gen_bq_schema.bigquery) = {
+    require: true
+    type_override: "TIMESTAMP"
+    partition: true
+  }];
+  optional int64 dataset_id = 3 [(gen_bq_schema.bigquery) = { require: true }];
+  // Source message UUIDs from this run of the dataset
+  repeated int64 message_ids = 4;
+  // Duration of time offset (milliseconds) between this datasetrun compared to
+  // the original data timestamps. Used to generate the original observation_ts
+  // from the messages in this dataset eg. original = now() - time_offset
+  optional int64 time_offset = 5 [(gen_bq_schema.bigquery) = { require: true }];
+  // start_ts of this dataset run
+  google.protobuf.Timestamp start_ts = 6 [
+    (gen_bq_schema.bigquery) = { type_override: "TIMESTAMP", require: false }
+  ];
+  // end_ts of this dataset run
+  google.protobuf.Timestamp end_ts = 7 [
+    (gen_bq_schema.bigquery) = { type_override: "TIMESTAMP", require: false }
+  ];
+}

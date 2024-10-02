@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package cavnue.messages.world_state.v1;
+
+import "cavnue/messages/common/v1/common.proto";
+
+// Platform world state actor message.
+message Actor {
+  // Common header.
+  common.v1.Header header = 1;
+}

@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package cavnue.messages.geometry.v1;
+
+import "cavnue/messages/common/v1/field_options.proto";
+
+// 2x2 Float Matrix
+message Matrix22f {
+  repeated float m = 1
+      [packed = true, (common.v1.rows) = 2, (common.v1.cols) = 2];
+}
+
+// 2x2 Double Matrix
+message Matrix22d {
+  repeated double m = 1
+      [packed = true, (common.v1.rows) = 2, (common.v1.cols) = 2];
+}
+
+// 3x3 Float Matrix
+message Matrix33f {
+  repeated float m = 1
+      [packed = true, (common.v1.rows) = 3, (common.v1.cols) = 3];
+}
+
+// 3x3 Double Matrix
+message Matrix33d {
+  repeated double m = 1
+      [packed = true, (common.v1.rows) = 3, (common.v1.cols) = 3];
+}
+
+// 3x4 Float Matrix
+message Matrix34f {
+  repeated float m = 1
+      [packed = true, (common.v1.rows) = 3, (common.v1.cols) = 4];
+}
+
+// 3x4 Double Matrix
+message Matrix34d {
+  repeated double m = 1
+      [packed = true, (common.v1.rows) = 3, (common.v1.cols) = 4];
+}
+
+// 4x4 Float Matrix
+message Matrix44f {
+  repeated float m = 1
+      [packed = true, (common.v1.rows) = 4, (common.v1.cols) = 4];
+}
+
+// 4x4 Double Matrix
+message Matrix44d {
+  repeated double m = 1
+      [packed = true, (common.v1.rows) = 4, (common.v1.cols) = 4];
+}
+
+// Generic Float Matrix
+message Matrixf {
+  uint32 rows = 1;
+  uint32 cols = 2;
+  repeated float m = 3 [packed = true];
+}
+
+// Generic Double Matrix
+message Matrixd {
+  uint32 rows = 1;
+  uint32 cols = 2;
+  repeated double m = 3 [packed = true];
+}

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package cavnue.messages.geometry.v1;
+
+import "cavnue/messages/geometry/v1/matrix.proto";
+import "cavnue/messages/geometry/v1/vector.proto";
+
+// Vector & covariance 2
+message CovarianceVector2f {
+  Vector2f value = 1;
+  Matrix22f covariance = 2;
+}
+
+// Vector & covariance 3
+message CovarianceVector3f {
+  Vector3f value = 1;
+  Matrix33f covariance = 2;
+}
+
+// Vector & covariance 3d
+message CovarianceVector3d {
+  Vector3d value = 1;
+  Matrix33f covariance = 2;
+}

@@ -1,0 +1,294 @@
+syntax = "proto3";
+
+package cavnue.messages.world_state.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/api.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+
+import "cavnue/messages/common/v1/common.proto";
+import "cavnue/messages/inference/v1/actor.proto";
+import "cavnue/messages/inference/v1/events.proto";
+import "cavnue/messages/inference/v1/traffic.proto";
+import "cavnue/messages/geometry/v1/point.proto";
+import "cavnue/messages/geometry/v1/bounding_box.proto";
+import "cavnue/messages/spatial/v1/wgs84.proto";
+import "cavnue/messages/data_warehouse/management/v1/datasets.proto";
+import "cavnue/messages/world_state/v1/ivi.proto";
+
+// Service that implements a query/response mechanisms for World State
+service WorldStateService {
+  // Get information about World State Service
+  rpc GetServiceApi(GetServiceApiRequest) returns (GetServiceApiResponse);
+  // Get DatasetRuns based on filter criteria
+  rpc GetDatasetRuns(GetDatasetRunsRequest) returns (GetDatasetRunsResponse);
+  // Get Datasets based on filter criteria
+  rpc GetDatasets(GetDatasetsRequest) returns (GetDatasetsResponse);
+  // Get all world state data based on filter predicates
+  rpc GetWorldState(GetWorldStateRequest) returns (GetWorldStateResponse);
+  // Get world state data based on filter predicates
+  rpc GetWorldStateNearRealTime(GetWorldStateNearRealTimeRequest)
+      returns (GetWorldStateNearRealTimeResponse);
+  // Return all actors based on filter predicates
+  rpc GetActors(GetActorsRequest) returns (GetActorsResponse);
+  // Return all events based on filter predicates
+  rpc GetEvents(GetEventsRequest) returns (GetEventsResponse);
+  // Return all assets based on filter predicates
+  rpc GetAssets(GetAssetsRequest) returns (GetAssetsResponse);
+  // Return all traffic aggregations based on the input criteria
+  rpc GetTrafficAggregation(GetTrafficAggregationRequest)
+      returns (GetTrafficAggregationResponse);
+  // Return average daily traffic
+  rpc GetAverageDailyTraffic(GetAverageDailyTrafficRequest)
+      returns (GetAverageDailyTrafficResponse);
+
+  // IVI
+  rpc GetActorEvents(GetActorEventsRequest) returns (GetActorEventsResponse);
+}
+
+// Message that describes a filter on a time interval
+message TimeFilter {
+  // start time of the interval
+  google.protobuf.Timestamp start_ts = 1;
+  // end time of the interval
+  google.protobuf.Timestamp end_ts = 2;
+}
+
+// Defines a Query to World State
+message Query {
+  // Filters based on known actor ids
+  message ActorIdFilter {
+    repeated int64 actor_ids = 1;
+  }
+  // Filters based on a geometric area
+  message SpatialFilter {
+    geometry.v1.BoundingBox2f bb_region = 1;
+  }
+
+  // Dataset run_id to use as base data.
+  optional int64 dataset_run_id = 1;
+  // Filter by time. Queries should always have a time filter.
+  optional TimeFilter time_filter = 2;
+  // Filter by Actor Ids
+  optional ActorIdFilter actors_filter = 3;
+  // Filter by Region
+  optional SpatialFilter spatial_filter = 4;
+  // Dataset id by name
+  optional string dataset_identifier = 5;
+  // Dataset id
+  optional int64 dataset_id = 6;
+  // Message limit to play back
+  optional uint32 num_messages = 7;
+  // Trace context
+  optional string trace_context = 8;
+}
+
+// Describes a Platform Asset
+message Asset {
+  // Same as sensor_id in Sensor table - A hash of the location_id, sensor
+  // identifier, and deployment timestamp
+  int64 sensor_id = 1;
+  // String identifier that represents location + sensor (eg. prod-i96-mm1844)
+  string identifier = 2;
+  // WGS84 Position of the Asset
+  spatial.v1.WGS84 wgs84_position = 3;
+}
+
+// A response that represents information from a Dataset
+message Dataset {
+  // Dataset ID
+  int64 dataset_id = 1;
+  // Dataset Identifier
+  string identifier = 2;
+  // int project number
+  int64 project_number = 3;
+  // string project_id
+  string project_id = 4;
+  // Dataset start_ts of original data
+  google.protobuf.Timestamp start_ts = 5;
+  // Dataset end_ts of original data
+  google.protobuf.Timestamp end_ts = 6;
+  // Data set type enum
+  data_warehouse.management.v1.Dataset.Type dataset_type = 7;
+  // unique sim id
+  string sim_id = 8;
+  // cohort id
+  int64 cohort_id = 9;
+  // Dataset start_ts of the specific dataset run that will be returned
+  google.protobuf.Timestamp run_start_ts = 10;
+  // Dataset end_ts of the specific dataset run that will be returned
+  google.protobuf.Timestamp run_end_ts = 11;
+}
+
+// A combination of information from the DatasetRuns and Datasets tables
+message DatasetRun {
+  // Unique Run ID
+  int64 run_id = 1;
+  // Run timestamp
+  google.protobuf.Timestamp run_ts = 2;
+  // Dataset ID
+  int64 dataset_id = 3;
+  // Dataset Identifier
+  string identifier = 4;
+  // int project number
+  int64 project_number = 5;
+  // string project_id
+  string project_id = 6;
+  // Dataset start_ts of original data
+  google.protobuf.Timestamp start_ts = 7;
+  // Dataset end_ts of original data
+  google.protobuf.Timestamp end_ts = 8;
+  // Data set type enum
+  data_warehouse.management.v1.Dataset.Type dataset_type = 9;
+  // unique sim id
+  string sim_id = 10;
+}
+
+// Request for API information
+message GetServiceApiRequest {
+  google.protobuf.Empty empty = 1;
+}
+
+// API information response
+message GetServiceApiResponse {
+  google.protobuf.Api api = 1;
+}
+
+// Request for DatasetRuns
+message GetDatasetRunsRequest {
+  // Only get runs for a single dataset_id
+  optional int64 dataset_id = 1;
+  // Only get a single run_id
+  optional int64 dataset_run_id = 2;
+  // Only get sim generated runs
+  optional bool sim_only = 3;
+  // Filter by a specific type of dataset
+  optional data_warehouse.management.v1.Dataset.Type type = 4;
+  // Dataset id by name
+  optional string dataset_identifier = 5;
+}
+
+// DatasetRuns response
+message GetDatasetRunsResponse {
+  repeated DatasetRun runs = 1;
+}
+
+// Request for getting all Datasets
+message GetDatasetsRequest {
+  optional bool sim_only = 1;
+}
+
+// Datasets response
+message GetDatasetsResponse {
+  repeated Dataset datasets = 1;
+}
+
+// Query World State to get Actors, Events, and Assets
+message GetWorldStateRequest {
+  Query query = 1;
+}
+
+// World State return of Actors, Events, and Assets
+message GetWorldStateResponse {
+  repeated inference.v1.Actor actors = 1;
+  repeated inference.v1.Event events = 2;
+  repeated Asset assets = 3;
+  repeated inference.v1.TrafficEvent traffic_events = 4;
+}
+
+// Query Live World State to get Actors and/or Events
+message GetWorldStateNearRealTimeRequest {
+  // request header
+  common.v1.Header header = 1;
+  // Filter by time. Queries should always have a time filter.
+  // If no time filter is provided, no data will be returned.
+  optional TimeFilter time_filter = 2;
+  // Field mask specifying the fields being requested for each actor
+  // If empty field mask is sent, no messages will be returned.
+  // For possible fields, refer to the proto file for the messages in
+  // GetLiveWorldStateResponse
+  google.protobuf.FieldMask actor_field_request = 3;
+  google.protobuf.FieldMask event_field_request = 4;
+  google.protobuf.FieldMask traffic_event_field_request = 5;
+}
+
+// Live World State return of Actors and Events
+message GetWorldStateNearRealTimeResponse {
+  // response header
+  common.v1.Header header = 1;
+
+  // messages returned along with their field masks.
+  // If field mask is empty, no messages were queried
+  // If field mask contains values, but no messages are present, no messages
+  // have been received in the time range
+  google.protobuf.FieldMask actor_field_mask = 2;
+  google.protobuf.FieldMask event_field_mask = 3;
+  google.protobuf.FieldMask traffic_event_field_mask = 4;
+
+  repeated inference.v1.Actor actors = 5;
+  repeated inference.v1.Event events = 6;
+  repeated inference.v1.TrafficEvent traffic_events = 7;
+}
+
+// Query World State to get Actors
+message GetActorsRequest {
+  Query query = 1;
+}
+
+// World State return of Actors
+message GetActorsResponse {
+  repeated inference.v1.Actor actors = 1;
+}
+
+// Query World State to get Events
+message GetEventsRequest {
+  Query query = 1;
+}
+
+// World State return of Events
+message GetEventsResponse {
+  repeated inference.v1.Event events = 1;
+}
+
+// Query World State to get Assets
+message GetAssetsRequest {
+  Query query = 1;
+}
+
+// World State return of Assets
+message GetAssetsResponse {
+  repeated Asset assets = 1;
+}
+
+// Query World State to get Traffic Aggregations
+message GetTrafficAggregationRequest {
+  TimeFilter time_filter = 1;
+  enum Frequency {
+    FREQUENCY_UNSPECIFIED = 0;
+    FREQUENCY_300_SECONDS = 1;
+    FREQUENCY_3600_SECONDS = 2;
+  }
+  Frequency frequency = 2;
+}
+
+// World State return of Traffic Aggregations
+message GetTrafficAggregationResponse {
+  // Lane Aggregation for the specified Frequency and time range
+  repeated inference.v1.LaneSegmentAggregation lane_aggregations = 1;
+  // Road Aggregation for the specified Frequency and time range
+  repeated inference.v1.RoadSegmentAggregation road_aggregations = 2;
+}
+
+// Query World State to get ADT
+message GetAverageDailyTrafficRequest {
+  TimeFilter time_filter = 1;
+}
+
+// World State return of ADT
+message GetAverageDailyTrafficResponse {
+  // Monthly average daily traffic for the specified time range
+  repeated inference.v1.MonthlyAverageDailyTrafficCalculation madt = 1;
+  // Annual average daily traffic for the specified time range
+  inference.v1.AnnualAverageDailyTrafficCalculation aadt = 2;
+}

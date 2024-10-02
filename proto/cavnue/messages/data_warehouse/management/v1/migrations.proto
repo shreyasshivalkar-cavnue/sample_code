@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package cavnue.messages.data_warehouse.management.v1;
+
+import "cavnue/third_party/bq/v1/bq_field.proto";
+import "cavnue/third_party/bq/v1/bq_table.proto";
+
+import "google/protobuf/timestamp.proto";
+
+// Bookmark of data migrations
+message Migration {
+  option (gen_bq_schema.bigquery_opts).table_name = "Migrations";
+
+  // Start timestamp for migratoin
+  optional google.protobuf.Timestamp start_ts = 1 [(gen_bq_schema.bigquery) = {
+    require: true
+    partition: true
+    type_override: "TIMESTAMP"
+  }];
+  // End timestamp for migration
+  optional google.protobuf.Timestamp end_ts = 2
+      [(gen_bq_schema.bigquery) = { require: true type_override: "TIMESTAMP" }];
+  // The cohort the migration belongs to
+  optional int64 cohort_id = 3
+      [(gen_bq_schema.bigquery) = { require: true cluster: true }];
+  // Driving trigger for migration
+  enum Trigger {
+    TRIGGER_UNSPECIFIED = 0;
+    TRIGGER_EVENT = 1;
+    TRIGGER_MANUAL = 2;
+    TRIGGER_DISTRIBUTION_TIME = 3;
+  }
+  optional Trigger trigger = 4 [(gen_bq_schema.bigquery) = { require: true }];
+  // The data ids in the migration
+  repeated int64 data_ids = 5;
+  // Optional identifier
+  string identifier = 6 [(gen_bq_schema.bigquery) = { require: true }];
+  // Optional simulation id
+  string simulation_id = 7;
+}

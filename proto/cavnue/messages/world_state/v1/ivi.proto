@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package cavnue.messages.world_state.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+
+import "cavnue/messages/inference/v1/actor.proto";
+import "cavnue/messages/spatial/v1/wgs84.proto";
+import "cavnue/third_party/bq/v1/bq_field.proto";
+
+message ActorEvent {
+  inference.v1.Actor actor = 1;
+  spatial.v1.WGS84 wgs84_position = 2;
+}
+
+message GetActorEventsRequest {
+  spatial.v1.WGS84 wgs84_position = 1;
+}
+
+message GetActorEventsResponse {
+  google.protobuf.Timestamp response_ts = 1;
+  repeated ActorEvent actor_events = 2;
+  google.protobuf.FieldMask field_mask = 3
+      [(gen_bq_schema.bigquery) = { ignore: true }];
+}

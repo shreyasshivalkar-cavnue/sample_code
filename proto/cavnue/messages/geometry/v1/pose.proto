@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package cavnue.messages.geometry.v1;
+
+import "cavnue/messages/geometry/v1/point.proto";
+
+// Attitude
+message Attitude {
+  float roll = 1;
+  float pitch = 2;
+  float yaw = 3;
+}
+
+// Pose.
+message Pose {
+  Point3f point = 1;
+  message None {
+    // Empty message for representing "None" orientation
+  }
+  oneof orientation {
+    Attitude attitude = 2;
+    Quaternionf angle = 3;
+    None none = 4;
+  }
+}

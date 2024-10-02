@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package cavnue.messages.inference.v1;
+
+import "cavnue/messages/common/v1/common.proto";
+import "cavnue/messages/common/v1/field_options.proto";
+import "cavnue/messages/geometry/v1/bounding_box.proto";
+import "cavnue/messages/geometry/v1/covariance.proto";
+import "cavnue/messages/geometry/v1/scalar.proto";
+import "cavnue/messages/spatial/v1/utm.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/field_mask.proto";
+
+import "cavnue/third_party/bq/v1/bq_field.proto";
+
+// Platform Actor message.
+message Actor {
+  // Common header.
+  common.v1.Header header = 1;
+  // Timestamp representing the observed data.
+  google.protobuf.Timestamp observation_ts = 2;
+  // Duration this data is valid.
+  google.protobuf.Duration observation_duration = 3;
+  // Data Source of this Actor
+  common.v1.DataSource data_source = 4;
+  enum Action {
+    ACTION_UNSPECIFIED = 0;
+    ACTION_UPDATE = 1;
+    ACTION_REMOVE = 2;
+    ACTION_ADD = 3;
+  }
+  // Specifies the type of actor message.
+  Action action = 5;
+  // Unique Actor Id.
+  int64 actor_id = 6;
+  // Object class enum.
+  common.v1.Classification classification = 7;
+  // Component wise posotion.
+  geometry.v1.CovarianceVector3d position = 8
+      [(common.v1.units) = UNITS_METERS];
+  // Component wise velocity.
+  geometry.v1.CovarianceVector3f velocity = 9
+      [(common.v1.units) = UNITS_METERS_PER_SECOND];
+  // Component wise acceleration.
+  geometry.v1.CovarianceVector2f acceleration = 10
+      [(common.v1.units) = UNITS_METERS_PER_SECOND_SQUARED];
+  // UTM position of actor.
+  spatial.v1.UTMProjection projection = 11;
+  // Actor lane number.
+  optional int32 lane = 12;
+  message ActorSize {
+    geometry.v1.VarianceScalarf x = 1;
+    geometry.v1.VarianceScalarf y = 2;
+    geometry.v1.VarianceScalarf z = 3;
+  }
+  // Size of the Actor.
+  optional ActorSize size = 13
+      [(common.v1.units) = UNITS_METERS, (common.v1.crs) = CRS_ENU];
+  // Bounding box used to generate this actor.
+  geometry.v1.BoundingBox2f bbox = 14;
+  enum Severity {
+    SEVERITY_UNSPECIFIED = 0;
+    SEVERITY_HAZARD = 1;
+    SEVERITY_OF_INTEREST = 2;
+  }
+  // Severity
+  Severity severity = 15;
+  message Attribute {
+    // Time attribute changed
+    google.protobuf.Timestamp ts = 1;
+    bool active = 2;
+    // Confidence of attribute occurence
+    float confidence = 3;
+  }
+  Attribute speeding = 16;
+  Attribute impeding = 17;
+  Attribute stationary = 18;
+  google.protobuf.FieldMask update_mask = 19
+      [(gen_bq_schema.bigquery) = { ignore: true }];
+  Attribute collision = 20;
+}

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package cavnue.messages.geometry.v1;
+
+message Point2f {
+  float x = 1;
+  float y = 2;
+}
+
+message Point2d {
+  double x = 1;
+  double y = 2;
+}
+
+message Point3f {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+}
+
+message Point3d {
+  double x = 1;
+  double y = 2;
+  double z = 3;
+}
+
+message Quaternionf {
+  float x = 1;
+  float y = 2;
+  float z = 3;
+  float w = 4;
+}
